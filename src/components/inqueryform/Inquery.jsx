@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./Inquery.module.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Inquery = () => {
   const {
@@ -8,148 +10,166 @@ const Inquery = () => {
     handleSubmit,
     watch,
     formState: { errors },
+    reset,
   } = useForm();
-  const [submitted, setSubmitted] = useState(false);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const interestedFor = watch("interestedFor");
 
   const onSubmit = (data) => {
-    console.log("Form Data:", data);
-    setSubmitted(true);
+    console.log("Submitted Data:", data); // <-- added console log here
+    setIsSubmitting(true);
+    setTimeout(() => {
+      toast.success("Form submitted successfully!", { position: "top-center" });
+      reset();
+      setIsSubmitting(false);
+    }, 1500);
   };
 
-  const interestValue = watch("interest");
-
   return (
-    <div className={styles.formContainer}>
-      {/* Header with Logo */}
-      <div className={styles.header}>
-        <img src="/logo.png" alt="Company Logo" className={styles.logo} />
-        <h2>Student Inquiry Form</h2>
-        <p>Fill out the form below for admission inquiries</p>
-      </div>
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <img src="/logo11.svg" alt="Company Logo" className={styles.logo} />
+        <h1 className={styles.title}>Student Inquiry Form</h1>
+      </header>
 
-      {/* Success message */}
-      {submitted && (
-        <div className={styles.successMsg}>
-          ✅ Thank you! Your inquiry has been submitted successfully.
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+      <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
         {/* Full Name */}
-        <div className={styles.formGroup}>
-          <label>Full Name</label>
+        <label>
+          Student Full Name <span className={styles.asterisk}>*</span>
           <input
             type="text"
-            placeholder="Enter your full name"
-            {...register("fullName", { required: "Full name is required" })}
+            {...register("fullName", { required: "Full Name is required" })}
+            placeholder="e.g. Ccr Panthi"
+            className={styles.input}
+            disabled={isSubmitting}
           />
           {errors.fullName && (
-            <span className={styles.error}>{errors.fullName.message}</span>
+            <p className={styles.error}>{errors.fullName.message}</p>
           )}
-        </div>
+        </label>
 
         {/* Mobile Number */}
-        <div className={styles.formGroup}>
-          <label>Mobile Number</label>
+        <label>
+          Mobile Number <span className={styles.asterisk}>*</span>
           <input
             type="tel"
-            placeholder="Enter your mobile number"
             {...register("mobile", {
               required: "Mobile number is required",
               pattern: {
-                value: /^[0-9]{7,15}$/,
-                message: "Invalid mobile number",
+                value: /^[0-9]{10}$/,
+                message: "Enter a valid 10-digit mobile number",
               },
             })}
+            placeholder="e.g. 98xxxxxx"
+            className={styles.input}
+            disabled={isSubmitting}
           />
           {errors.mobile && (
-            <span className={styles.error}>{errors.mobile.message}</span>
+            <p className={styles.error}>{errors.mobile.message}</p>
           )}
-        </div>
+        </label>
 
         {/* Email */}
-        <div className={styles.formGroup}>
-          <label>Email ID</label>
+        <label>
+          Email ID <span className={styles.asterisk}>*</span>
           <input
             type="email"
-            placeholder="Enter your email"
             {...register("email", {
               required: "Email is required",
-              pattern: { value: /^\S+@\S+$/i, message: "Invalid email" },
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: "Enter a valid email address",
+              },
             })}
+            placeholder="e.g. Ccr@example.com"
+            className={styles.input}
+            disabled={isSubmitting}
           />
           {errors.email && (
-            <span className={styles.error}>{errors.email.message}</span>
+            <p className={styles.error}>{errors.email.message}</p>
           )}
-        </div>
+        </label>
 
         {/* Address */}
-        <div className={styles.formGroup}>
-          <label>Address</label>
+        <label>
+          Address <span className={styles.asterisk}>*</span>
           <input
             type="text"
-            placeholder="Enter your address"
             {...register("address", { required: "Address is required" })}
+            placeholder="e.g. Kathmandu, Nepal"
+            className={styles.input}
+            disabled={isSubmitting}
           />
           {errors.address && (
-            <span className={styles.error}>{errors.address.message}</span>
+            <p className={styles.error}>{errors.address.message}</p>
           )}
-        </div>
+        </label>
+
+        {/* Current Study Level */}
+        <label>
+          Current Study Level (Optional)
+          <select
+            {...register("studyLevel")}
+            className={styles.select}
+            disabled={isSubmitting}
+          >
+            <option value="">Select</option>
+            <option value="SEE">SEE</option>
+            <option value="+2">+2</option>
+            <option value="Bachelor">Bachelor</option>
+          </select>
+        </label>
 
         {/* Interested For */}
-        <div className={styles.formGroup}>
-          <label>Interested For</label>
+        <label>
+          Interested For <span className={styles.asterisk}>*</span>
           <select
-            {...register("interest", { required: "Please select an option" })}
+            {...register("interestedFor", {
+              required: "Please select a field",
+            })}
+            className={styles.select}
+            disabled={isSubmitting}
           >
-            <option value="">-- Select a field --</option>
+            <option value="">Select</option>
             <option value="Web Development">Web Development</option>
             <option value="Graphics Design">Graphics Design</option>
             <option value="Digital Marketing">Digital Marketing</option>
             <option value="UI/UX Design">UI/UX Design</option>
             <option value="Others">Others</option>
           </select>
-          {errors.interest && (
-            <span className={styles.error}>{errors.interest.message}</span>
+          {errors.interestedFor && (
+            <p className={styles.error}>{errors.interestedFor.message}</p>
           )}
-        </div>
+        </label>
 
-        {/* If "Others" selected */}
-        {interestValue === "Others" && (
-          <div className={styles.formGroup}>
-            <label>Specify Field</label>
+        {/* Other Field Name */}
+        {interestedFor === "Others" && (
+          <label>
+            Please Specify <span className={styles.asterisk}>*</span>
             <input
               type="text"
-              placeholder="Enter your field of interest"
               {...register("otherField", {
-                required: "Please specify your field",
+                required: "Please specify the field",
               })}
+              placeholder="e.g. Mobile App Development"
+              className={styles.input}
+              disabled={isSubmitting}
             />
             {errors.otherField && (
-              <span className={styles.error}>{errors.otherField.message}</span>
+              <p className={styles.error}>{errors.otherField.message}</p>
             )}
-          </div>
+          </label>
         )}
 
-        {/* I am not a robot */}
-        <div className={styles.checkboxGroup}>
-          <input
-            type="checkbox"
-            {...register("notRobot", {
-              required: "Please confirm you are not a robot",
-            })}
-          />
-          <label>I am not a robot</label>
-        </div>
-        {errors.notRobot && (
-          <span className={styles.error}>{errors.notRobot.message}</span>
-        )}
-
-        {/* Submit Button */}
-        <button type="submit" className={styles.submitBtn}>
-          Submit Inquiry
+        {/* Submit */}
+        <button type="submit" className={styles.button} disabled={isSubmitting}>
+          {isSubmitting ? "Submitting..." : "Submit"}
         </button>
       </form>
+
+      <ToastContainer />
     </div>
   );
 };
