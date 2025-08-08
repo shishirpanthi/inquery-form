@@ -17,14 +17,27 @@ const Inquery = () => {
 
   const interestedFor = watch("interestedFor");
 
-  const onSubmit = (data) => {
-    console.log("Submitted Data:", data); // <-- added console log here
+  const onSubmit = async (data) => {
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Submission failed");
+      }
       toast.success("Form submitted successfully!", { position: "top-center" });
       reset();
+    } catch (err) {
+      toast.error(err.message || "Submission failed", {
+        position: "top-center",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   return (
